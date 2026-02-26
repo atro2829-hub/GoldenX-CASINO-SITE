@@ -1,14 +1,15 @@
-FROM php:8.1-apache
+FROM php:7.4-apache
 
 RUN apt-get update && apt-get install -y \
-    git zip unzip libzip-dev \
-    && docker-php-ext-install pdo pdo_mysql zip
+    git unzip zip libzip-dev libonig-dev libxml2-dev \
+    && docker-php-ext-install pdo pdo_mysql mbstring zip exif pcntl bcmath
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
-
 COPY . .
+
+ENV COMPOSER_MEMORY_LIMIT=-1
 
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
