@@ -1,14 +1,16 @@
-FROM php:7.4-apache
+FROM php:7.4-cli
 
-# حذف جميع ملفات MPM
-RUN rm -f /etc/apache2/mods-enabled/mpm_*.load \
-    && rm -f /etc/apache2/mods-available/mpm_*.load
+RUN apt-get update && apt-get install -y \
+    git unzip zip libzip-dev libonig-dev libxml2-dev \
+    && docker-php-ext-install pdo pdo_mysql mbstring zip exif pcntl bcmath
 
-# إنشاء ملف واحد فقط يدويًا لـ prefork
-RUN echo "LoadModule mpm_prefork_module /usr/lib/apache2/modules/mod_mpm_prefork.so" \
-    > /etc/apache2/mods-enabled/mpm_prefork.load
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-RUN a2enmod rewrite
+WORKDIR /var/www/html
+COPY . .
 
-COPY . /var/www/html
-EXPOSE 80
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+EXPOSE 8000
+
+CMD php artisan serve --host=0.0.0.0 --port=8000
