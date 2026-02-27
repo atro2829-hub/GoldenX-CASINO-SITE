@@ -1,11 +1,8 @@
-FROM php:7.4-apache
+FROM php:7.4.33-apache-bullseye
 
 RUN apt-get update && apt-get install -y \
     git unzip zip libzip-dev libonig-dev libxml2-dev \
     && docker-php-ext-install pdo pdo_mysql mbstring zip exif pcntl bcmath
-
-# حل مشكلة MPM
-RUN a2dismod mpm_event && a2enmod mpm_prefork
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
